@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">OLX App</string>
+
+    <string name="email">Email</string>
+    <string name="senha">Senha</string>
+    <string name="logar">Logar</string>
+    <string name="cadastre_se">Cadastre-se</string>
+    <string name="acessar">Acessar</string>
+</resources>
