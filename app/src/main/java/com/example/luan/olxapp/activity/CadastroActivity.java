@@ -2,12 +2,16 @@ package com.example.luan.olxapp.activity;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
 import com.example.luan.olxapp.R;
 import com.example.luan.olxapp.helper.ConfiguracaoFirebase;
@@ -19,7 +23,7 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 
-public class MainActivity extends AppCompatActivity {
+public class CadastroActivity extends AppCompatActivity {
 
     private EditText campoEmail, campoSenha;
     private Switch tipoAcesso;
@@ -30,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_cadastro);
 
         campoEmail = findViewById(R.id.editEmail);
         campoSenha = findViewById(R.id.editSenha);
@@ -94,6 +98,7 @@ public class MainActivity extends AppCompatActivity {
                                     if ( task.isSuccessful()){
 
                                         showMessage("Logado com sucesso");
+                                        startActivity(new Intent(getApplicationContext(), AnunciosActivity.class));
 
                                     }else{
                                         showMessage("Erro ao fazer login" + task.getException());
@@ -117,4 +122,6 @@ public class MainActivity extends AppCompatActivity {
     private void showMessage(String message){
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
+
+
 }
