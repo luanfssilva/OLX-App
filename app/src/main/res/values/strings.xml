@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">OLX App</string>
+    <string name="title_activity_meus_anuncios">MeusAnunciosActivity</string>
 
     <string name="email">Email</string>
     <string name="senha">Senha</string>
@@ -9,4 +10,7 @@
     <string name="meus_anuncios">Meus anúncios</string>
     <string name="sair">Sair</string>
     <string name="cadastrar_entrar">Cadastrar / Entrar</string>
+    <string name="titulo">Título</string>
+    <string name="valor">Valor</string>
+    <string name="descricao">Descrição</string>
 </resources>

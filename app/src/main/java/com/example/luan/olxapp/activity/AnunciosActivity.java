@@ -53,12 +53,12 @@ public class AnunciosActivity extends AppCompatActivity {
             case R.id.menu_cadastrar:
                 startActivity(new Intent(getApplicationContext(), CadastroActivity.class));
                 break;
-            case R.id.menu_anuncios:
-
-                break;
             case R.id.menu_sair:
                 auth.signOut();
                 invalidateOptionsMenu();
+                break;
+            case R.id.menu_anuncios:
+                startActivity(new Intent(getApplicationContext(), MeusAnunciosActivity.class));
                 break;
         }
 
