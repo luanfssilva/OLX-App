@@ -13,4 +13,5 @@
     <string name="titulo">Título</string>
     <string name="valor">Valor</string>
     <string name="descricao">Descrição</string>
+    <string name="hint_phone_number">Telefone</string>
 </resources>
