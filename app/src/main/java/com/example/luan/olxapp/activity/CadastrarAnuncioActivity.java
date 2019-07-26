@@ -23,12 +23,23 @@ import android.widget.Toast;
 
 import com.blackcat.currencyedittext.CurrencyEditText;
 import com.example.luan.olxapp.R;
+import com.example.luan.olxapp.helper.ConfiguracaoFirebase;
 import com.example.luan.olxapp.helper.Permissoes;
+import com.example.luan.olxapp.model.Anuncio;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.santalu.maskedittext.MaskEditText;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 public class CadastrarAnuncioActivity extends AppCompatActivity {
 
@@ -38,13 +49,14 @@ public class CadastrarAnuncioActivity extends AppCompatActivity {
     private Button btnCadastrarAnuncio;
     private ImageView img1, img2, img3;
     private Spinner spUF, spCategoria;
+    private StorageReference storage;
 
     private String[] permissoes = new String[]{
             Manifest.permission.READ_EXTERNAL_STORAGE
     };
 
-    private List<String> listaFotosRecuperadas = new ArrayList<>();
     private String[] fotosRecuperadas = new String[3];
+    private ArrayList<String>listaURLFotos = new ArrayList<>();
 
 
     @Override
@@ -70,6 +82,8 @@ public class CadastrarAnuncioActivity extends AppCompatActivity {
         //Validar Permissões
         Permissoes.validarPermissoes(permissoes,this,1);
 
+        storage = ConfiguracaoFirebase.getFirebaseStorage();
+
 
         carregarDadosSpinner();
 
@@ -79,9 +93,115 @@ public class CadastrarAnuncioActivity extends AppCompatActivity {
             public void onClick(View v) {
 
 
+                validarDadosAnuncio();
+
             }
         });
     }
+
+    private void salvarAnuncio(final Anuncio anuncio){
+
+        /*
+         *Salvar imagem no Storage
+         */
+        for (String urlImagem : fotosRecuperadas) {
+
+            final StorageReference imagemAnuncio = storage.child("imagens")
+                    .child("anuncios")
+                    .child(anuncio.getIdAnuncio())
+                    .child(UUID.randomUUID().toString());
+
+            //Fazer upload do arquivo
+            UploadTask uploadTask = imagemAnuncio.putFile( Uri.parse(urlImagem));
+
+            Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                @Override
+                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                    if (!task.isSuccessful()){
+                        throw task.getException();
+                    }
+                    return imagemAnuncio.getDownloadUrl();
+                }
+            }).addOnSuccessListener(new OnSuccessListener<Uri>() {
+                @Override
+                public void onSuccess(Uri uri) {
+                    listaURLFotos.add(uri.toString());
+
+                    if(listaURLFotos.size() == fotosRecuperadas.length){
+                        anuncio.setFotos(listaURLFotos);
+                        anuncio.salvar();
+                        Toast.makeText(CadastrarAnuncioActivity.this,"Anúncio Cadastrado",Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+
+
+                }
+            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                @Override
+                public void onComplete(@NonNull Task<Uri> task) {
+                    /*if (task.isSuccessful()){
+                        Uri downloadUri = task.getResult();
+                        listaURLFotos.add(downloadUri.toString());
+                    }else {
+                        Toast.makeText(CadastrarAnuncioActivity.this, "Upload da imagem falhou! ", Toast.LENGTH_LONG).show();
+                    }*/
+                }
+            });
+
+        }
+
+    }
+
+    private void validarDadosAnuncio(){
+
+        if(fotosRecuperadas[0] != null || fotosRecuperadas[1] != null || fotosRecuperadas[2] != null){
+            String fone = "";
+
+            String estado = spUF.getSelectedItem().toString();
+            String categoria = spCategoria.getSelectedItem().toString();
+            String titulo = campoTitulo.getText().toString();
+            String valor = String.valueOf(campoValor.getRawValue());
+            String telefone = campoTelefone.getText().toString();
+            if(campoTelefone.getRawText() != null){
+                fone = campoTelefone.getRawText();
+            }
+            String descricao = campoDescricao.getText().toString();
+
+            if( !estado.isEmpty()){
+                if( !categoria.isEmpty()){
+                    if( !titulo.isEmpty()){
+                        if( !valor.isEmpty() && !valor.equals("0")){
+                            if( !telefone.isEmpty() && fone.length() >= 10){
+
+                                Anuncio anuncio = new Anuncio(estado,categoria,titulo,valor,telefone,descricao);
+                                salvarAnuncio(anuncio);
+
+                            }else{
+                                showToast("Preencha o campo telefone, digite ao menos 10 números!");
+                            }
+                        }else{
+                            showToast("Preencha o campo valor");
+                        }
+                    }else{
+                        showToast("Preencha o campo titulo");
+                    }
+                }else{
+                    showToast("Preencha o campo categoria");
+                }
+            }else{
+                showToast("Preencha o campo estado!");
+            }
+
+
+        }else{
+            showToast("Selecione ao menos uma foto!");
+        }
+    }
+
+    private void showToast(String mensagem){
+        Toast.makeText(this, mensagem,Toast.LENGTH_SHORT).show();
+    }
+
 
     public void onClickImg(View v){
 
@@ -154,7 +274,7 @@ public class CadastrarAnuncioActivity extends AppCompatActivity {
                 fotosRecuperadas[2] = caminhoImagem;
             }
 
-            listaFotosRecuperadas.add(caminhoImagem);
+            //listaFotosRecuperadas.add(caminhoImagem);
         }
     }
 

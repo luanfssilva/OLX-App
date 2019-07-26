@@ -20,6 +20,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="onClickImg"
+            android:scaleType="centerCrop"
             app:srcCompat="@drawable/padrao" />
 
         <ImageView
@@ -28,6 +29,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="onClickImg"
+            android:scaleType="centerCrop"
             app:srcCompat="@drawable/padrao" />
 
         <ImageView
@@ -36,6 +38,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="onClickImg"
+            android:scaleType="centerCrop"
             app:srcCompat="@drawable/padrao" />
     </LinearLayout>
 
