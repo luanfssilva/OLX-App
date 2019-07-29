@@ -18,6 +18,9 @@ public class Anuncio {
     private String descricao;
     private List<String> fotos;
 
+    public Anuncio() {
+    }
+
     public Anuncio(String estado, String categoria, String titulo, String valor, String telefone, String descricao) {
 
         DatabaseReference anuncioRef = ConfiguracaoFirebase.getFirebase().child("meus_anuncios");
@@ -120,4 +123,5 @@ public class Anuncio {
     public void setFotos(List<String> fotos) {
         this.fotos = fotos;
     }
+
 }
