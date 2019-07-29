@@ -1,10 +1,12 @@
 package com.example.luan.olxapp.activity;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 
 import com.example.luan.olxapp.adapter.AdapterAnuncio;
 import com.example.luan.olxapp.helper.ConfiguracaoFirebase;
+import com.example.luan.olxapp.helper.RecyclerItemClickListener;
 import com.example.luan.olxapp.model.Anuncio;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -16,6 +18,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.Toast;
 
 import com.example.luan.olxapp.R;
 import com.google.firebase.database.DataSnapshot;
@@ -28,6 +32,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import dmax.dialog.SpotsDialog;
+
 public class MeusAnunciosActivity extends AppCompatActivity {
 
 
@@ -35,6 +41,7 @@ public class MeusAnunciosActivity extends AppCompatActivity {
     private List<Anuncio> anuncioList = new ArrayList<>();
     private AdapterAnuncio adapterAnuncio;
     private DatabaseReference anuncioUsuarioRef;
+    private AlertDialog dialog;
 
 
     @Override
@@ -58,6 +65,30 @@ public class MeusAnunciosActivity extends AppCompatActivity {
         //Recupera anuncios para o usuario
         recuperarAnuncios();
 
+        recyclerAnuncios.addOnItemTouchListener(
+                new RecyclerItemClickListener(this, recyclerAnuncios, new RecyclerItemClickListener.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View view, int position) {
+
+                    }
+
+                    @Override
+                    public void onLongItemClick(View view, int position) {
+                        Anuncio anuncioSelecionado = anuncioList.get(position);
+
+                        anuncioSelecionado.remover();
+
+                        adapterAnuncio.notifyDataSetChanged();
+                        Toast.makeText(MeusAnunciosActivity.this, "Anuncio Excluido", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                    }
+                })
+        );
+
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -70,6 +101,12 @@ public class MeusAnunciosActivity extends AppCompatActivity {
 
     private void recuperarAnuncios(){
 
+        dialog = new SpotsDialog.Builder()
+                .setContext(this)
+                .setMessage("Recuperando Anúncio")
+                .build();
+        dialog.show();
+
         anuncioUsuarioRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -79,6 +116,8 @@ public class MeusAnunciosActivity extends AppCompatActivity {
                 }
                 Collections.reverse(anuncioList);
                 adapterAnuncio.notifyDataSetChanged();
+
+                dialog.dismiss();
             }
 
             @Override
