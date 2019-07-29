@@ -2,11 +2,11 @@ package com.example.luan.olxapp.activity;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -27,19 +27,17 @@ import com.example.luan.olxapp.helper.ConfiguracaoFirebase;
 import com.example.luan.olxapp.helper.Permissoes;
 import com.example.luan.olxapp.model.Anuncio;
 import com.google.android.gms.tasks.Continuation;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.santalu.maskedittext.MaskEditText;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+
+import dmax.dialog.SpotsDialog;
 
 public class CadastrarAnuncioActivity extends AppCompatActivity {
 
@@ -50,6 +48,7 @@ public class CadastrarAnuncioActivity extends AppCompatActivity {
     private ImageView img1, img2, img3;
     private Spinner spUF, spCategoria;
     private StorageReference storage;
+    private AlertDialog dialog;
 
     private String[] permissoes = new String[]{
             Manifest.permission.READ_EXTERNAL_STORAGE
@@ -101,6 +100,12 @@ public class CadastrarAnuncioActivity extends AppCompatActivity {
 
     private void salvarAnuncio(final Anuncio anuncio){
 
+        dialog = new SpotsDialog.Builder()
+                .setContext(this)
+                .setMessage("Salvando Anúncio")
+                .build();
+        dialog.show();
+
         /*
          *Salvar imagem no Storage
          */
@@ -130,26 +135,13 @@ public class CadastrarAnuncioActivity extends AppCompatActivity {
                     if(listaURLFotos.size() == fotosRecuperadas.length){
                         anuncio.setFotos(listaURLFotos);
                         anuncio.salvar();
+                        dialog.dismiss();
                         Toast.makeText(CadastrarAnuncioActivity.this,"Anúncio Cadastrado",Toast.LENGTH_SHORT).show();
                         finish();
                     }
-
-
-                }
-            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-                @Override
-                public void onComplete(@NonNull Task<Uri> task) {
-                    /*if (task.isSuccessful()){
-                        Uri downloadUri = task.getResult();
-                        listaURLFotos.add(downloadUri.toString());
-                    }else {
-                        Toast.makeText(CadastrarAnuncioActivity.this, "Upload da imagem falhou! ", Toast.LENGTH_LONG).show();
-                    }*/
                 }
             });
-
         }
-
     }
 
     private void validarDadosAnuncio(){
@@ -160,7 +152,7 @@ public class CadastrarAnuncioActivity extends AppCompatActivity {
             String estado = spUF.getSelectedItem().toString();
             String categoria = spCategoria.getSelectedItem().toString();
             String titulo = campoTitulo.getText().toString();
-            String valor = String.valueOf(campoValor.getRawValue());
+            String valor = campoValor.getText().toString();
             String telefone = campoTelefone.getText().toString();
             if(campoTelefone.getRawText() != null){
                 fone = campoTelefone.getRawText();
