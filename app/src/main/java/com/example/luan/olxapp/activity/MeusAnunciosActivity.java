@@ -9,7 +9,6 @@ import com.example.luan.olxapp.helper.ConfiguracaoFirebase;
 import com.example.luan.olxapp.helper.RecyclerItemClickListener;
 import com.example.luan.olxapp.model.Anuncio;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;

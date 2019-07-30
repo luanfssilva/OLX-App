@@ -91,9 +91,7 @@ public class CadastrarAnuncioActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-
                 validarDadosAnuncio();
-
             }
         });
     }
@@ -109,15 +107,15 @@ public class CadastrarAnuncioActivity extends AppCompatActivity {
         /*
          *Salvar imagem no Storage
          */
-        for (String urlImagem : fotosRecuperadas) {
+        for (int i = 0; i < fotosRecuperadas.length; i++) {
 
             final StorageReference imagemAnuncio = storage.child("imagens")
                     .child("anuncios")
                     .child(anuncio.getIdAnuncio())
-                    .child(UUID.randomUUID().toString());
+                    .child("Imagem" + i);
 
             //Fazer upload do arquivo
-            UploadTask uploadTask = imagemAnuncio.putFile( Uri.parse(urlImagem));
+            UploadTask uploadTask = imagemAnuncio.putFile( Uri.parse(fotosRecuperadas[i]));
 
             Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
                 @Override

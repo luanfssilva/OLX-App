@@ -1,9 +1,16 @@
 package com.example.luan.olxapp.model;
 
+import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
 import com.example.luan.olxapp.helper.ConfiguracaoFirebase;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.List;
 
@@ -58,6 +65,7 @@ public class Anuncio {
 
         anuncioRef.removeValue();
         removerAnuncioPublico();
+        removeFotosStorage();
     }
 
     public void removerAnuncioPublico(){
@@ -83,6 +91,36 @@ public class Anuncio {
                 .setValue(this);
 
     }
+
+    public void removeFotosStorage(){
+
+        List<String> listaDeFotos = this.getFotos();
+        for(int i = 0; i < listaDeFotos.size(); i++){
+
+            StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+            StorageReference storage;
+
+            storage = storageReference.child("imagens").child("anuncios").child(this.getIdAnuncio())
+                        .child("Imagem"+i);
+
+            storage.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+
+                    //Adicione o que você quiser aqui após a exclusão ser bem sucedida.
+                    Log.i("FOTO", "onSuccess: Foto deletada");
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+
+                    //E aqui caso não seja
+                    Log.i("FOTO", "onFailure: Erro para deletar Foto");
+                }
+            });
+        }
+    }
+
 
     public String getIdAnuncio() {
         return idAnuncio;
