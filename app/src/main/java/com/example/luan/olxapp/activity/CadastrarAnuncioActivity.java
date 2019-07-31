@@ -287,8 +287,6 @@ public class CadastrarAnuncioActivity extends AppCompatActivity {
         );
         adapterCategoria.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
         spCategoria.setAdapter( adapterCategoria);
-
-
     }
 
 

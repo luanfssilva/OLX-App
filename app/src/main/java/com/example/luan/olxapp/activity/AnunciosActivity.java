@@ -6,11 +6,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
 
 import com.example.luan.olxapp.R;
 import com.example.luan.olxapp.adapter.AdapterAnuncio;
@@ -37,6 +41,7 @@ public class AnunciosActivity extends AppCompatActivity {
     private List<Anuncio> anuncioList = new ArrayList<>();
     private DatabaseReference anunciosPublicosRef;
     private AlertDialog dialog;
+    private String filtroEstado = "";
 
 
     @Override
@@ -60,9 +65,95 @@ public class AnunciosActivity extends AppCompatActivity {
         recyclerAnunciosPublicos.setAdapter(adapterAnuncio);
 
         recuperarAnunciosPublicos();
+
+        btnRegiao.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDialogFiltroEstado();
+            }
+        });
+
+        btnCategoria.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
     }
 
-    public void recuperarAnunciosPublicos(){
+    private void showDialogFiltroEstado(){
+        AlertDialog.Builder dialogEstado = new AlertDialog.Builder(this);
+        dialogEstado.setTitle("Selecione o estado desejado");
+
+        //Configurar o spinner
+        View viewSpinner = getLayoutInflater().inflate(R.layout.dialog_spinner, null);
+
+        final Spinner spinner = viewSpinner.findViewById(R.id.spinnerFiltro);
+        String[] estados = getResources().getStringArray(R.array.estados);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this, android.R.layout.simple_spinner_item, estados
+        );
+        adapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
+        spinner.setAdapter(adapter);
+
+        dialogEstado.setView(viewSpinner);
+        dialogEstado.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                filtroEstado = spinner.getSelectedItem().toString();
+                recuperarAnunciosPorEstado();
+            }
+        }).setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+
+        AlertDialog dialog = dialogEstado.create();
+        dialog.show();
+    }
+
+    private void recuperarAnunciosPorEstado(){
+
+        dialog = new SpotsDialog.Builder()
+                .setContext(this)
+                .setMessage("Recuperando anúncios")
+                .setCancelable(false)
+                .build();
+        dialog.show();
+
+        //Configura nó por estado
+        anunciosPublicosRef = ConfiguracaoFirebase.getFirebase()
+                .child("anuncios")
+                .child(filtroEstado);
+
+        anuncioList.clear();
+        anunciosPublicosRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                for(DataSnapshot categorias : dataSnapshot.getChildren()){
+                    for(DataSnapshot anuncios: categorias.getChildren()){
+                        Anuncio anuncio = anuncios.getValue(Anuncio.class);
+                        anuncioList.add(anuncio);
+
+                    }
+                }
+
+                Collections.reverse(anuncioList);
+                adapterAnuncio.notifyDataSetChanged();
+                dialog.dismiss();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+            }
+        });
+
+    }
+
+    private void recuperarAnunciosPublicos(){
 
         dialog = new SpotsDialog.Builder()
                 .setContext(this)
