@@ -9,12 +9,14 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.example.luan.olxapp.R;
 import com.example.luan.olxapp.adapter.AdapterAnuncio;
@@ -24,6 +26,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -41,7 +44,8 @@ public class AnunciosActivity extends AppCompatActivity {
     private List<Anuncio> anuncioList = new ArrayList<>();
     private DatabaseReference anunciosPublicosRef;
     private AlertDialog dialog;
-    private String filtroEstado = "";
+    private String filtroEstado, filtroCategoria;
+    private boolean filtrandoPoEstado = false;
 
 
     @Override
@@ -76,9 +80,48 @@ public class AnunciosActivity extends AppCompatActivity {
         btnCategoria.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                showDialogFiltroCategoria();
             }
         });
+    }
+
+
+    private void showDialogFiltroCategoria(){
+
+        if(filtrandoPoEstado){
+            AlertDialog.Builder dialogCategoria = new AlertDialog.Builder(this);
+            dialogCategoria.setTitle("Selecione a categoria desejada");
+
+            //Configurar o spinner
+            View viewSpinner = getLayoutInflater().inflate(R.layout.dialog_spinner, null);
+
+            final Spinner spinner = viewSpinner.findViewById(R.id.spinnerFiltro);
+            String[] categoria = getResources().getStringArray(R.array.categorias);
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                    this, android.R.layout.simple_spinner_item, categoria
+            );
+            adapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
+            spinner.setAdapter(adapter);
+
+            dialogCategoria.setView(viewSpinner);
+            dialogCategoria.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    filtroCategoria = spinner.getSelectedItem().toString();
+                    recuperarAnunciosPorFiltroCategoria();
+                }
+            }).setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            });
+            AlertDialog dialog = dialogCategoria.create();
+            dialog.show();
+        }
+        else {
+            Toast.makeText(this, "Escolha primeiro uma região!",
+                    Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void showDialogFiltroEstado(){
@@ -101,7 +144,8 @@ public class AnunciosActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 filtroEstado = spinner.getSelectedItem().toString();
-                recuperarAnunciosPorEstado();
+                recuperarAnunciosPorFiltroEstado();
+                filtrandoPoEstado = true;
             }
         }).setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
             @Override
@@ -109,12 +153,50 @@ public class AnunciosActivity extends AppCompatActivity {
 
             }
         });
-
         AlertDialog dialog = dialogEstado.create();
         dialog.show();
     }
 
-    private void recuperarAnunciosPorEstado(){
+    private void recuperarAnunciosPorFiltroCategoria(){
+
+        dialog = new SpotsDialog.Builder()
+                .setContext(this)
+                .setMessage("Recuperando anúncios ")
+                .setCancelable(false)
+                .build();
+        dialog.show();
+
+        anunciosPublicosRef = ConfiguracaoFirebase.getFirebase()
+                .child("anuncios")
+                .child(filtroEstado)
+                .child(filtroCategoria);
+
+        anuncioList.clear();
+
+        anunciosPublicosRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                for(DataSnapshot anuncios : dataSnapshot.getChildren()){
+                    Anuncio anuncio = anuncios.getValue(Anuncio.class);
+                    anuncioList.add(anuncio);
+                }
+
+                Collections.reverse(anuncioList);
+                adapterAnuncio.notifyDataSetChanged();
+                dialog.dismiss();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+
+    private void recuperarAnunciosPorFiltroEstado(){
 
         dialog = new SpotsDialog.Builder()
                 .setContext(this)
@@ -123,7 +205,6 @@ public class AnunciosActivity extends AppCompatActivity {
                 .build();
         dialog.show();
 
-        //Configura nó por estado
         anunciosPublicosRef = ConfiguracaoFirebase.getFirebase()
                 .child("anuncios")
                 .child(filtroEstado);
@@ -140,7 +221,6 @@ public class AnunciosActivity extends AppCompatActivity {
 
                     }
                 }
-
                 Collections.reverse(anuncioList);
                 adapterAnuncio.notifyDataSetChanged();
                 dialog.dismiss();
@@ -150,7 +230,6 @@ public class AnunciosActivity extends AppCompatActivity {
             public void onCancelled(@NonNull DatabaseError databaseError) {
             }
         });
-
     }
 
     private void recuperarAnunciosPublicos(){
@@ -184,7 +263,6 @@ public class AnunciosActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-
             }
         });
     }
