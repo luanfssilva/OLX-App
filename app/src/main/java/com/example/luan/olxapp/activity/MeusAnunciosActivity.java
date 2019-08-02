@@ -2,6 +2,7 @@ package com.example.luan.olxapp.activity;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 
 import com.example.luan.olxapp.adapter.AdapterAnuncio;
@@ -30,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import dmax.dialog.SpotsDialog;
 
@@ -49,6 +51,12 @@ public class MeusAnunciosActivity extends AppCompatActivity {
         setContentView(R.layout.activity_meus_anuncios);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
+
 
         recyclerAnuncios = findViewById(R.id.recyclerAnuncios);
 

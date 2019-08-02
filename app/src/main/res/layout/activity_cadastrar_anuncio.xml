@@ -28,6 +28,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
             android:onClick="onClickImg"
             android:scaleType="centerCrop"
             app:srcCompat="@drawable/padrao" />
@@ -90,7 +92,7 @@
         android:layout_height="wrap_content"
         android:hint="@string/hint_phone_number"
         android:inputType="phone"
-        app:met_mask="+55(##) #####-####"
+        app:met_mask="(##) #####-####"
         android:background="@drawable/bg_edit_text"
         android:layout_marginBottom="16dp"
         android:padding="10dp"

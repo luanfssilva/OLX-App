@@ -269,6 +269,7 @@ public class AnunciosActivity extends AppCompatActivity {
         dialog.show();
 
         anuncioList.clear();
+
         anunciosPublicosRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -278,7 +279,6 @@ public class AnunciosActivity extends AppCompatActivity {
                         for(DataSnapshot anuncios: categorias.getChildren()){
                             Anuncio anuncio = anuncios.getValue(Anuncio.class);
                             anuncioList.add(anuncio);
-
                         }
                     }
                 }
